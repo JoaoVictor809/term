@@ -40,6 +40,8 @@ export default function termPage() {
     // campo assinar
     const [showToSign, setShowToSign] = useState(false)
     const [signatureURL, setSignatureURL] = useState<string | null>(null);
+    //botão de salvar
+    const [showButtonSave, setShowButtonSave] = useState(false);
 
 
     return (
@@ -49,7 +51,7 @@ export default function termPage() {
                 <div className="flex flex-col items-center justify-center pt-10 gap-7">
                     <h1 className={`${boldFont.className} text-2xl text-center`}>TERMO DE RESPONSABILIDADE DE BACKUP – DADOS CORPORATIVO</h1>
                     <div className="w-2/3 max-h-70 overflow-y-auto scroll flex flex-col gap-5">
-                        <p className="text-justify ">
+                        <div className="text-justify ">
                             <strong>COBASI COMÉRCIO DE PRODUTOS BÁSICOS E INDUSTRIALIZADOS S.A., </strong>
                             pessoa jurídica de direito privado, inscrita no CNPJ/MF sob o n.º 53.153.938/0007-
                             01, com endereço na Rua Professora Helena Moura Lacerda, n.º 140 – Vila
@@ -73,17 +75,16 @@ export default function termPage() {
                             4. O colaborador fica ciente que, passado o prazo de 5 (cinco) dias corridos, a
                             máquina recolhida pela equipe de TI passará pelo processo de formatação
                             e não serão mais mantidos os arquivos salvos na máquina física.
-                        </p>
-                        <p className="text-center">
+                        </div>
+                        <div className="text-center">
                             São Paulo, {dataFormatada}
-                        </p>
+                        </div>
                         <div className="flex flex-col items-center mt-10">
                             {signatureURL && (
                                 <img src={signatureURL} alt="Assinatura" className="mt-4 w-[200px] h-[100px] object-contain" />
                             )}
                             <div className="w-60 h-px bg-black" />
                             <span className="text-sm text-gray-700 mt-2">{nome}</span>
-
                         </div>
                     </div>
                 </div>
@@ -93,7 +94,7 @@ export default function termPage() {
                 <div className="flex flex-col items-center justify-center pt-10 gap-7">
                     <h1 className={`${boldFont.className} text-2xl text-center`}>TERMO DE RESPONSABILIDADE - NOTEBOOK CORPORATIVO</h1>
                     <div className="w-2/3 max-h-70 overflow-y-auto scroll flex flex-col gap-5">
-                        <p className="text-justify ">
+                        <div className="text-justify ">
                             <strong>COBASI COMÉRCIO DE PRODUTOS BÁSICOS E INDUSTRIALIZADOS S.A.,</strong>
                             {" "}pessoa jurídica de direito privado, inscrita no CNPJ/MF sob o n.º 53.153.938/0007-
                             01, com endereço na Rua Professora Helena Moura Lacerda, n.º 140 – Vila
@@ -117,10 +118,10 @@ export default function termPage() {
                             4. O colaborador fica ciente que, passado o prazo de 5 (cinco) dias corridos, a
                             máquina recolhida pela equipe de TI passará pelo processo de formatação
                             e não serão mais mantidos os arquivos salvos na máquina física.
-                        </p>
-                        <p className="text-center">
+                        </div>
+                        <div className="text-center">
                             São Paulo, {dataFormatada}
-                        </p>
+                        </div>
                         <div className="flex flex-col items-center mt-10">
                             {signatureURL && (
                                 <img src={signatureURL} alt="Assinatura" className="mt-4 w-[200px] h-[100px] object-contain" />
@@ -132,29 +133,70 @@ export default function termPage() {
                     </div>
                 </div>
             )}
-            <div className="flex justify-center items-center gap-20 pt-7">
-                <div className="w-[120px] h-10 flex items-center justify-center cursor-pointer bg-[#D9D9D9] shadow-xl active:opacity-18"
+            <div className="flex justify-around items-center pt-7">
+                <button className="w-[20%] h-10 flex items-center justify-center cursor-pointer bg-[#D9D9D9] shadow-xl active:opacity-18"
                     onClick={() => {
                         setShowTermNote(true)
                         setShowTermBack(false)
                         setShowButtonGo(true)
                         setShowButtonSign(false)
-                    }}>Voltar</div>
+                    }}>Voltar</button>
                 {showButtonGo && (
-                    <div className="w-[120px] h-10 flex items-center justify-center cursor-pointer bg-[#009CA6] shadow-xl active:opacity-18"
+                    <button className="w-[20%] h-10 flex items-center justify-center cursor-pointer bg-[#009CA6] shadow-xl active:opacity-18"
                         onClick={() => {
                             setShowTermNote(false)
                             setShowTermBack(true)
                             setShowButtonGo(false)
                             setShowButtonSign(true)
-                        }}>Seguir</div>
+                        }}>Seguir</button>
                 )}
                 {showButtonSign && (
-                    <div className="w-[120px] h-10 flex items-center justify-center cursor-pointer bg-[#009CA6] shadow-xl active:opacity-18"
+                    <button className="w-[20%] h-10 flex items-center justify-center cursor-pointer bg-[#009CA6] shadow-xl active:opacity-18"
                         onClick={() => {
                             setShowToSign(true)
-                        }}>Assinar</div>
+                        }}>Assinar</button>
                 )}
+                {showButtonSave && (
+                    <button
+                        className="w-[20%] h-10 flex items-center justify-center cursor-pointer bg-[#7EB339] shadow-xl active:opacity-18"
+                        onClick={async () => {
+                            if (!signatureURL) {
+                                alert("Assinatura não encontrada.");
+                                return;
+                            }
+
+                            const base64 = signatureURL.replace(/^data:image\/png;base64,/, "");
+
+                            const res = await fetch("../api/gerarDocx", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({
+                                    nome,
+                                    cargo,
+                                    rg,
+                                    data: dataFormatada,
+                                    assinaturaBase64: base64,
+                                }),
+                            });
+
+                            if (!res.ok) {
+                                alert("Erro ao gerar o documento.");
+                                return;
+                            }
+
+                            const blob = await res.blob();
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement("a");
+                            a.href = url;
+                            a.download = "termo-responsabilidade.docx";
+                            a.click();
+                            URL.revokeObjectURL(url);
+                        }}
+                    >
+                        Salvar
+                    </button>
+                )}
+
             </div>
             {/* campo de assinar */}
             {showToSign && (
@@ -182,7 +224,8 @@ export default function termPage() {
                                     const dataUrl = sigCanvas.current?.toDataURL("image/png");
                                     if (dataUrl) {
                                         setSignatureURL(dataUrl);
-                                        setShowToSign(false); // fecha o modal de assinatura
+                                        setShowToSign(false);
+                                        setShowButtonSave(true)
                                     }
                                 }}
                             >
