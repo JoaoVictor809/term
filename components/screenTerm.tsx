@@ -2,7 +2,7 @@
 import dynamic from "next/dynamic";
 import { useSearchParams } from 'next/navigation'
 import localFont from 'next/font/local'
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react"; // Added useEffect
 import SignatureCanvas from 'react-signature-canvas';
 import { IoClose } from "react-icons/io5";
 
@@ -15,16 +15,24 @@ export default function termPage() {
         sigCanvas.current?.clear();
     };
 
-    const date = new Date();
-    const dataFormatada = new Intl.DateTimeFormat('pt-BR', {
-        day: '2-digit',
-        month: 'long',
-        year: 'numeric',
-    }).format(date);
-    console.log(dataFormatada);
+    // State for formatted date
+    const [dataFormatada, setDataFormatada] = useState('');
+
+    useEffect(() => {
+        // Moved date formatting here to run only on client-side
+        const date = new Date();
+        const formattedDate = new Intl.DateTimeFormat('pt-BR', {
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric',
+        }).format(date);
+        setDataFormatada(formattedDate);
+        // console.log(formattedDate); // Original console.log, can be re-enabled if needed for debugging
+    }, []); // Empty dependency array ensures this runs once on mount
+
     //função para salvar(baixar)
     const saveContratic = () => {
-
+        // This function seems unused, can be removed or implemented
     }
 
     const searchParams = useSearchParams()
@@ -167,20 +175,22 @@ export default function termPage() {
 
                             const base64 = signatureURL.replace(/^data:image\/png;base64,/, "");
 
-                            const res = await fetch("../api/gerarDocx", {
+                            // Using absolute path for API route
+                            const res = await fetch("/api/gerarDocx", {
                                 method: "POST",
                                 headers: { "Content-Type": "application/json" },
                                 body: JSON.stringify({
                                     nome,
                                     cargo,
                                     rg,
-                                    data: dataFormatada,
+                                    data: dataFormatada, // This will now use the state variable
                                     assinaturaBase64: base64,
                                 }),
                             });
 
                             if (!res.ok) {
-                                alert("Erro ao gerar o documento.");
+                                const errorData = await res.json().catch(() => ({ message: "Erro desconhecido ao gerar o documento." }));
+                                alert(`Erro ao gerar o documento: ${errorData.message || res.statusText}`);
                                 return;
                             }
 
@@ -189,8 +199,10 @@ export default function termPage() {
                             const a = document.createElement("a");
                             a.href = url;
                             a.download = "termo-responsabilidade.docx";
+                            document.body.appendChild(a); // Append to body to ensure click works in all browsers
                             a.click();
                             URL.revokeObjectURL(url);
+                            document.body.removeChild(a); // Clean up
                         }}
                     >
                         Salvar
