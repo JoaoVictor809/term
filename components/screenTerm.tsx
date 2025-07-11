@@ -11,6 +11,11 @@ const PagTerm = dynamic(() => import('./headerTerm'), { ssr: false });
 const boldFont = localFont({ src: '../public/fonts/Poppins-Bold.ttf' })
 export default function termPage() {
     const sigCanvas = useRef<SignatureCanvas>(null);
+    const res = await fetch("/api/gerarDocx", { method: "POST", ... });
+    const data = await res.json();
+    if (data.success) {
+        window.open(data.url, "_blank"); // ou salvar no sistema
+    }
     const clearSignature = () => {
         sigCanvas.current?.clear();
     };
@@ -27,13 +32,8 @@ export default function termPage() {
             year: 'numeric',
         }).format(date);
         setDataFormatada(formattedDate);
-        // console.log(formattedDate); // Original console.log, can be re-enabled if needed for debugging
-    }, []); // Empty dependency array ensures this runs once on mount
+    }, []);
 
-    //função para salvar(baixar)
-    const saveContratic = () => {
-        // This function seems unused, can be removed or implemented
-    }
 
     const searchParams = useSearchParams()
     const nome = searchParams.get('nome')
@@ -183,7 +183,7 @@ export default function termPage() {
                                     nome,
                                     cargo,
                                     rg,
-                                    data: dataFormatada, // This will now use the state variable
+                                    data: dataFormatada,
                                     assinaturaBase64: base64,
                                 }),
                             });
