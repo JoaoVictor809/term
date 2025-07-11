@@ -3,12 +3,10 @@ import { Document, Packer, Paragraph, TextRun, ImageRun, AlignmentType, PageBrea
 import { Buffer } from "buffer";
 import fs from "fs";
 import path from "path"
-import { uploadToGoogleDrive } from '../../../../lib/googleDrive';
 
 export async function POST(req: NextRequest) {
     const logoPath = path.join(process.cwd(), "public", "logo.png");
     const logoBuffer = fs.readFileSync(logoPath);
-
     try {
         const body = await req.json();
         const { nome, cargo, rg, data, assinaturaBase64 } = body;
@@ -176,7 +174,7 @@ export async function POST(req: NextRequest) {
             quebraLinha(),
             new Paragraph({
                 alignment: AlignmentType.CENTER,
-                children: [new TextRun({ text: `São Paulo, ${data}`, font: "Aptos (Corpo)", size: 24 })],
+                children: [new TextRun({ text: `São Paulo, ${data}`, font: "Aptos (Corpo)", size:24 })],
             }),
             quebraLinha(),
             ...assinaturaContent,
@@ -243,14 +241,6 @@ export async function POST(req: NextRequest) {
         });
 
         const buffer = await Packer.toBuffer(doc);
-        const driveResponse = await uploadToGoogleDrive(
-            buffer,
-            `termo-${nome}-${Date.now()}.docx`,
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            process.env.GDRIVE_FOLDER_ID!
-        );
-
-        return NextResponse.json({ success: true, url: driveResponse.webViewLink });
 
         return new NextResponse(buffer, {
             status: 200,
