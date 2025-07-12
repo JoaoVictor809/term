@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { Document, Packer, Paragraph, TextRun, ImageRun, AlignmentType, PageBreak } from "docx";
 import { Buffer } from "buffer";
 import fs from "fs";
-import path from "path"
+import path from "path";
+import { Octokit } from "@octokit/rest";
 
 export async function POST(req: NextRequest) {
     const logoPath = path.join(process.cwd(), "public", "logo.png");
@@ -55,7 +56,7 @@ export async function POST(req: NextRequest) {
                     new TextRun({ text: "HP ELITEBOOK 640 G11  ", bold: true, font: "Aptos (Corpo)", size: 24 }),
                     new TextRun({ text: "SÉRIE", font: "Aptos (Corpo)", size: 24 }),
                     new TextRun({ text: "BRJ442MM83 e MOUSE C/ FIO,", font: "Aptos (Corpo)", bold: true, size: 24 }),
-                    new TextRun({ text: " ao Colaborador ", font: "Aptos (Corpo)", size: 24 }),
+                    new TextRun({ text: ", ao Colaborador ", font: "Aptos (Corpo)", size: 24 }),
                     new TextRun({ text: nome, bold: true, font: "Aptos (Corpo)", size: 24 }),
                     new TextRun({ text: ", Cargo ", font: "Aptos (Corpo)", size: 24 }),
                     new TextRun({ text: cargo, bold: true, font: "Aptos (Corpo)", size: 24 }),
@@ -242,11 +243,27 @@ export async function POST(req: NextRequest) {
 
         const buffer = await Packer.toBuffer(doc);
 
+        // Upload to GitHub
+        const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+        const owner = process.env.GITHUB_OWNER;
+        const repo = process.env.GITHUB_REPO;
+        const filePath = process.env.GITHUB_PATH ? `${process.env.GITHUB_PATH}/termo-responsabilidade-${nome}-${data}.docx` : `termo-responsabilidade-${nome}-${data}.docx`;
+
+        if (owner && repo) {
+            await octokit.repos.createOrUpdateFileContents({
+                owner,
+                repo,
+                path: filePath,
+                message: `Adicionando termo de responsabilidade para ${nome}`,
+                content: buffer.toString("base64"),
+            });
+        }
+
         return new NextResponse(buffer, {
             status: 200,
             headers: {
                 "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                "Content-Disposition": 'attachment; filename="termo-responsabilidade.docx"',
+                "Content-Disposition": `attachment; filename="termo-responsabilidade-${nome}.docx"`,
             },
         });
     } catch (error) {

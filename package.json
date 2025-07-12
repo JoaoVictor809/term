@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@lottiefiles/dotlottie-react": "^0.14.2",
+    "@octokit/rest": "^22.0.0",
     "docx": "^9.5.1",
     "docxtemplater": "^3.65.2",
     "fetch": "^1.1.0",
