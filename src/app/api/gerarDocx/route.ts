@@ -6,7 +6,8 @@ import path from "path";
 import { Octokit } from "@octokit/rest";
 
 export async function POST(req: NextRequest) {
-    const logoPath = path.join(process.cwd(), "public", "logo.png");
+    // Use um caminho relativo para a imagem
+    const logoPath = path.resolve("./public/logo.png");
     const logoBuffer = await fs.readFile(logoPath);
     try {
         const body = await req.json();
@@ -56,7 +57,7 @@ export async function POST(req: NextRequest) {
                     new TextRun({ text: "HP ELITEBOOK 640 G11  ", bold: true, font: "Aptos (Corpo)", size: 24 }),
                     new TextRun({ text: "SÉRIE", font: "Aptos (Corpo)", size: 24 }),
                     new TextRun({ text: "BRJ442MM83 e MOUSE C/ FIO,", font: "Aptos (Corpo)", bold: true, size: 24 }),
-                    new TextRun({ text: ", ao Colaborador ", font: "Aptos (Corpo)", size: 24 }),
+                    new TextRun({ text: " ao Colaborador ", font: "Aptos (Corpo)", size: 24 }),
                     new TextRun({ text: nome, bold: true, font: "Aptos (Corpo)", size: 24 }),
                     new TextRun({ text: ", Cargo ", font: "Aptos (Corpo)", size: 24 }),
                     new TextRun({ text: cargo, bold: true, font: "Aptos (Corpo)", size: 24 }),
