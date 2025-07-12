@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Document, Packer, Paragraph, TextRun, ImageRun, AlignmentType, PageBreak } from "docx";
 import { Buffer } from "buffer";
-import fs from "fs";
+import fs from "fs/promises";
 import path from "path";
 import { Octokit } from "@octokit/rest";
 
 export async function POST(req: NextRequest) {
     const logoPath = path.join(process.cwd(), "public", "logo.png");
-    const logoBuffer = fs.readFileSync(logoPath);
+    const logoBuffer = await fs.readFile(logoPath);
     try {
         const body = await req.json();
         const { nome, cargo, rg, data, assinaturaBase64 } = body;
