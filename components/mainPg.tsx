@@ -58,7 +58,11 @@ export default function Pgmain() {
             <Header />
 
             {/* main */}
-            <div className="p-3 flex flex-col gap-7 relative min-h-screen">
+            <div className="p-3 flex flex-col gap-7 ">
+                {/* imagem */}
+                
+                    <img src="/animals.svg" alt="Imagem ilustrativa de um cão e gato" className='absolute bottom-0 right-0 w-[65%] md:w-[40%]'/>
+                
                 <p className={`${boldFont.className} text-2xl md:text-3xl`}>Termo de responsabilidade</p>
                 <form className="flex flex-col gap-5" action={handleRouter}>
                     {/* inputs */}
@@ -80,7 +84,7 @@ export default function Pgmain() {
                             required
                         />
                         <input
-                            type="number"
+                            type="text"
                             className={`${regularFont.className} w-full md:w-auto outline-0 border border-[#009CA6] p-4 rounded-2xl placeholder:text-[#009CA6]`}
                             placeholder="RG sem os pontos"
                             value={inputRg}
@@ -100,7 +104,7 @@ export default function Pgmain() {
                 </form>
 
                 {/* contato com a julia */}
-                <div className="fixed bottom-6 left-6 flex flex-row items-end gap-3 z-50">
+                <div className="fixed bottom-6 left-3 flex flex-row items-end gap-3 z-50">
                     <button
                         onClick={handleClick}
                         className="flex items-center justify-center w-14 h-14 bg-[#009CA6] rounded-full shadow-lg"
@@ -108,22 +112,19 @@ export default function Pgmain() {
                         <RiMessage3Fill color="#fff" size={30} />
                     </button>
                     {showContact && (
-                        <div className="backdrop-blur-md bg-white/30 border border-white/20 shadow-xl/30 rounded-2xl max-w-[80vw]">
-                            <div className="flex flex-row gap-5 p-3 items-center">
+                        <div className="backdrop-blur-md bg-white/30 border border-white/20 shadow-xl/30 rounded-2xl ">
+                            <div className="flex flex-row gap-2 p-3 items-center">
                                 <MdEmail color="#009CA6" size={25} />
                                 <div>
                                     <p className={`${boldFont.className} text-[#009CA6]`}>Email</p>
-                                    <p className={`${regularFont.className} text-sm break-words`}>julia.moreira@petanjofranqueadora.com.br</p>
+                                    <p className={`${regularFont.className} text-[65%] break-words`}>julia.moreira@petanjofranqueadora.com.br</p>
                                 </div>
                             </div>
                         </div>
                     )}
                 </div>
 
-                {/* imagem */}
-                <div className="absolute right-0 bottom-0 hidden md:block z-0">
-                    <img src="/animals.svg" alt="Imagem ilustrativa de um cão e gato" />
-                </div>
+                
             </div>
         </div>
 

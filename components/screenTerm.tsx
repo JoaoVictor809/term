@@ -2,9 +2,11 @@
 import dynamic from "next/dynamic";
 import { useSearchParams } from 'next/navigation'
 import localFont from 'next/font/local'
-import { useState, useRef, useEffect } from "react"; // Added useEffect
+import { useState, useRef, useEffect } from "react";
 import SignatureCanvas from 'react-signature-canvas';
 import { IoClose } from "react-icons/io5";
+import Loader from '../components/animation/Loader'
+import Swal from 'sweetalert2'
 
 const PagTerm = dynamic(() => import('./headerTerm'), { ssr: false });
 // fontes
@@ -27,9 +29,9 @@ export default function termPage() {
             year: 'numeric',
         }).format(date);
         setDataFormatada(formattedDate);
-    }, []); 
+    }, []);
 
-    
+
     const searchParams = useSearchParams()
     const nome = searchParams.get('nome')
     const cargo = searchParams.get('cargo')
@@ -45,7 +47,12 @@ export default function termPage() {
     const [signatureURL, setSignatureURL] = useState<string | null>(null);
     //botão de salvar
     const [showButtonSave, setShowButtonSave] = useState(false);
+    // monitoramento da animação de carregar 
+    const [loading, setLoading] = useState(false);
 
+    if (loading) {
+        return <Loader />
+    }
 
     return (
         <div>
@@ -53,7 +60,7 @@ export default function termPage() {
             {showTermBackup && (
                 <div className="flex flex-col items-center justify-center pt-10 gap-7">
                     <h1 className={`${boldFont.className} text-2xl text-center`}>TERMO DE RESPONSABILIDADE DE BACKUP – DADOS CORPORATIVO</h1>
-                    <div className="w-2/3 max-h-70 overflow-y-auto scroll flex flex-col gap-5">
+                    <div className="w-5/6 max-h-90 overflow-y-auto scroll flex flex-col gap-5 md:w-2/3 md:max-h-80">
                         <div className="text-justify ">
                             <strong>COBASI COMÉRCIO DE PRODUTOS BÁSICOS E INDUSTRIALIZADOS S.A., </strong>
                             pessoa jurídica de direito privado, inscrita no CNPJ/MF sob o n.º 53.153.938/0007-
@@ -87,7 +94,7 @@ export default function termPage() {
                                 <img src={signatureURL} alt="Assinatura" className="mt-4 w-[200px] h-[100px] object-contain" />
                             )}
                             <div className="w-60 h-px bg-black" />
-                            <span className="text-sm text-gray-700 mt-2">{nome}</span>
+                            <span className="text-sm text-gray-700 mt-2"><strong>{nome}</strong></span>
                         </div>
                     </div>
                 </div>
@@ -96,7 +103,7 @@ export default function termPage() {
             {showTermNote && (
                 <div className="flex flex-col items-center justify-center pt-10 gap-7">
                     <h1 className={`${boldFont.className} text-2xl text-center`}>TERMO DE RESPONSABILIDADE - NOTEBOOK CORPORATIVO</h1>
-                    <div className="w-2/3 max-h-70 overflow-y-auto scroll flex flex-col gap-5">
+                    <div className="w-5/6 max-h-90 overflow-y-auto scroll flex flex-col gap-5 md:w-2/3 md:max-h-80">
                         <div className="text-justify ">
                             <strong>COBASI COMÉRCIO DE PRODUTOS BÁSICOS E INDUSTRIALIZADOS S.A.,</strong>
                             {" "}pessoa jurídica de direito privado, inscrita no CNPJ/MF sob o n.º 53.153.938/0007-
@@ -130,7 +137,7 @@ export default function termPage() {
                                 <img src={signatureURL} alt="Assinatura" className="mt-4 w-[200px] h-[100px] object-contain" />
                             )}
                             <div className="w-60 h-px bg-black" />
-                            <span className="text-sm text-gray-700 mt-2">{nome}</span>
+                            <span className="text-sm text-gray-700 mt-2"><strong>{nome}</strong></span>
 
                         </div>
                     </div>
@@ -164,40 +171,59 @@ export default function termPage() {
                         className="w-[20%] h-10 flex items-center justify-center cursor-pointer bg-[#7EB339] shadow-xl active:opacity-18"
                         onClick={async () => {
                             if (!signatureURL) {
-                                alert("Assinatura não encontrada.");
+                                Swal.fire({
+                                    title: "Erro na assinatura!",
+                                    text: "Assinatura não encontrada!",
+                                    icon: "error"
+                                });
                                 return;
                             }
 
-                            const base64 = signatureURL.replace(/^data:image\/png;base64,/, "");
-
-                            // Using absolute path for API route
-                            const res = await fetch("/api/gerarDocx", {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({
-                                    nome,
-                                    cargo,
-                                    rg,
-                                    data: dataFormatada, 
-                                    assinaturaBase64: base64,
-                                }),
-                            });
-
-                            if (!res.ok) {
-                                const errorData = await res.json().catch(() => ({ message: "Erro desconhecido ao gerar o documento." }));
-                                alert(`Erro ao gerar o documento: ${errorData.message || res.statusText}`);
-                                return;
+                            try {
+                                setLoading(true);
+                                const base64 = signatureURL.replace(/^data:image\/png;base64,/, "");
+                                const res = await fetch("/api/gerarDocx", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({
+                                        nome,
+                                        cargo,
+                                        rg,
+                                        data: dataFormatada,
+                                        assinaturaBase64: base64,
+                                    }),
+                                });
+                                if (res.ok) {
+                                    setLoading(false);
+                                    Swal.fire({
+                                        title: "Termo salvo!",
+                                        text: "Seu termo de responsabilidade foi salvo no nosso sistema",
+                                        icon: "success"
+                                    });
+                                }
+                                if (!res.ok) {
+                                    const errorData = await res.json().catch(() => ({ message: "Erro desconhecido ao gerar o documento." }));
+                                    Swal.fire({
+                                        title: "Erro na formatação do documento!",
+                                        text: `Erro ao gerar o documento: ${errorData.message || res.statusText}`,
+                                        icon: "error"
+                                    });
+                                    return;
+                                }
+                                const blob = await res.blob();
+                                const url = URL.createObjectURL(blob);
+                                const a = document.createElement("a");
+                                a.href = url;
+                                a.download = "termo-responsabilidade.docx";
+                                document.body.appendChild(a);
+                                a.click();
+                                URL.revokeObjectURL(url);
+                                document.body.removeChild(a);
+                            } catch {
+                                alert("Erro inesperado entrar")
                             }
 
-                            const blob = await res.blob();
-                            const url = URL.createObjectURL(blob);
-                            const a = document.createElement("a");
-                            a.href = url;
-                            a.download = "termo-responsabilidade.docx";
-                            document.body.appendChild(a); // Append to body to ensure click works in all browsers
-                            a.click();
-                            URL.revokeObjectURL(url);
-                            document.body.removeChild(a); // Clean up
+
                         }}
                     >
                         Salvar

@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
             quebraLinha(),
             new Paragraph({
                 numbering: { reference: "notebookList", level: 0 },
-                children: [new TextRun({ text: "O Notebook deverá ser numbering ÚNICA e EXCLUSIVAMENTE a serviço da empresa, tendo em vista a atividade a ser exercida pelo Colaborador.", font: "Aptos (Corpo)", size: 24 })],
+                children: [new TextRun({ text: "O Notebook deverá ser utilizado ÚNICA e EXCLUSIVAMENTE a serviço da empresa, tendo em vista a atividade a ser exercida pelo Colaborador.", font: "Aptos (Corpo)", size: 24 })],
             }),
             new Paragraph({
                 numbering: { reference: "notebookList", level: 0 },
