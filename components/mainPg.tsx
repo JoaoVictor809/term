@@ -6,6 +6,7 @@ import { MdEmail } from "react-icons/md";
 import { useRouter } from 'next/navigation';
 import Header from '../components/headerTerm'
 import Loader from '../components/animation/Loader'
+import CryptoJS from "crypto-js";
 
 
 const boldFont = localFont({ src: '../public/fonts/Poppins-Bold.ttf' })
@@ -19,6 +20,12 @@ export default function Pgmain() {
     const [loading, setLoading] = useState(false);
 
     const [click, setClick] = useState(Number)
+
+    const secretKey = process.env.NEXT_PUBLIC_AES_SECRET as string;
+
+    const encrypt = (text: string) => {
+        return CryptoJS.AES.encrypt(text, secretKey).toString();
+    };
 
 
     const handleClick = () => {
@@ -38,12 +45,12 @@ export default function Pgmain() {
         setLoading(true);
         setTimeout(() => {
             try {
-                router.push(`/term?nome=${inputName}&cargo=${inputPosition}&rg=${inputRg}`);
+                router.push(`/term?nome=${inputName}&cargo=${inputPosition}&rg=${encodeURIComponent(encrypt(inputRg))}`);
             } catch {
                 alert('Erro ao gerar contrato');
                 setLoading(false);
             }
-        }, 5000); 
+        }, 5000);
     };
 
 
@@ -60,9 +67,9 @@ export default function Pgmain() {
             {/* main */}
             <div className="p-3 flex flex-col gap-7 ">
                 {/* imagem */}
-                
-                    <img src="/animals.svg" alt="Imagem ilustrativa de um cão e gato" className='absolute bottom-0 right-0 w-[65%] md:w-[40%]'/>
-                
+
+                <img src="/animals.svg" alt="Imagem ilustrativa de um cão e gato" className='absolute bottom-0 right-0 w-[65%] md:w-[40%]' />
+
                 <p className={`${boldFont.className} text-2xl md:text-3xl`}>Termo de responsabilidade</p>
                 <form className="flex flex-col gap-5" action={handleRouter}>
                     {/* inputs */}
@@ -124,7 +131,7 @@ export default function Pgmain() {
                     )}
                 </div>
 
-                
+
             </div>
         </div>
 

@@ -7,6 +7,7 @@ import SignatureCanvas from 'react-signature-canvas';
 import { IoClose } from "react-icons/io5";
 import Loader from '../components/animation/Loader'
 import Swal from 'sweetalert2'
+import CryptoJS from "crypto-js";
 
 const PagTerm = dynamic(() => import('./headerTerm'), { ssr: false });
 // fontes
@@ -16,12 +17,9 @@ export default function termPage() {
     const clearSignature = () => {
         sigCanvas.current?.clear();
     };
-
-    // State for formatted date
+    // formato da data na assinatura
     const [dataFormatada, setDataFormatada] = useState('');
-
     useEffect(() => {
-        // Moved date formatting here to run only on client-side
         const date = new Date();
         const formattedDate = new Intl.DateTimeFormat('pt-BR', {
             day: '2-digit',
@@ -31,11 +29,25 @@ export default function termPage() {
         setDataFormatada(formattedDate);
     }, []);
 
+    const secretKey = process.env.NEXT_PUBLIC_AES_SECRET as string;
+    const decrypt = (cipherText: string) => {
+        const bytes = CryptoJS.AES.decrypt(cipherText, secretKey);
+        return bytes.toString(CryptoJS.enc.Utf8);
+    };
+    const searchParams = useSearchParams();
+    const encryptedRg = searchParams.get("rg");
 
-    const searchParams = useSearchParams()
+    let rg = "";
+    if (encryptedRg) {
+        try {
+            rg = decrypt(decodeURIComponent(encryptedRg));
+        } catch (e) {
+            console.error("Erro ao descriptografar RG:", e);
+        }
+    }
+
     const nome = searchParams.get('nome')
     const cargo = searchParams.get('cargo')
-    const rg = searchParams.get('rg')
     const [showTermBackup, setShowTermBack] = useState(false);
     const [showTermNote, setShowTermNote] = useState(true);
     // botão seguir
