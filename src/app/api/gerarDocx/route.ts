@@ -11,6 +11,7 @@ export async function POST(req: NextRequest) {
 
         const body = await req.json();
         const { nome, cargo, rg, data, assinaturaBase64 } = body;
+        const nomeSemAssentos = nome.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
         if (!nome || !cargo || !rg || !data) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -247,7 +248,7 @@ export async function POST(req: NextRequest) {
         const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
         const owner = process.env.GITHUB_OWNER!;
         const repo = process.env.GITHUB_REPO!;
-        const filePath = process.env.GITHUB_PATH ? `${process.env.GITHUB_PATH}/termo-responsabilidade-${nome}-${data}.docx` : `termo-responsabilidade-${nome}-${data}.docx`;
+        const filePath = process.env.GITHUB_PATH ? `${process.env.GITHUB_PATH}/termo-responsabilidade-${nomeSemAssentos}-${data}.docx` : `termo-responsabilidade-${nomeSemAssentos}-${data}.docx`;
 
         let sha;
         try {
@@ -269,7 +270,7 @@ export async function POST(req: NextRequest) {
             owner,
             repo,
             path: filePath,
-            message: `Adicionando termo de responsabilidade para ${nome}`,
+            message: `Adicionando termo de responsabilidade para ${nomeSemAssentos}`,
             content: buffer.toString("base64"),
             sha,
         });
@@ -279,7 +280,7 @@ export async function POST(req: NextRequest) {
             status: 200,
             headers: {
                 "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                "Content-Disposition": `attachment; filename="termo-responsabilidade-${nome}.docx"`,
+                "Content-Disposition": `attachment; filename="termo-responsabilidade-${nomeSemAssentos}.docx"`,
             },
         });
     } catch (error) {
