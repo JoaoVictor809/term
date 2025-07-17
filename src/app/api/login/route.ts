@@ -4,7 +4,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { key } = body
 
-    const validKey = '123456' // substitua por sua chave real
+    const validKey = 'CoB5202' 
 
     if (key === validKey) {
         const response = NextResponse.json({ success: true })
@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
             httpOnly: true,
             sameSite: 'strict',
             secure: process.env.NODE_ENV === 'production',
-            maxAge: 60 * 60 * 24, // 1 dia
+            maxAge: 60 * 60 * 24, 
         })
 
         return response

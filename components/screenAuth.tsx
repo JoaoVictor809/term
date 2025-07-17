@@ -56,7 +56,7 @@ export default function screenAuth() {
                 />
                 <button
                     type='submit'
-                    className={`${boldFont.className} bg-[#009CA6] text-[20px] w-[30%] h-[50px] md:w-[10%] shadow-[0px_9px_11px_rgba(0,0,0,0.25)] cursor-pointer active:opacity-25`}
+                    className={`${boldFont.className} bg-[#009CA6] text-[20px] w-[30%] h-[50px] md:w-[10%] shadow-[0px_9px_11px_rgba(0,0,0,0.25)] z-99`}
                 >Entrar</button>
                 {error && <p className="text-red-500">{error}</p>}
             </form>
