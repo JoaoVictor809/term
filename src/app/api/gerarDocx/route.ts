@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { Document, Packer, Paragraph, TextRun, ImageRun, AlignmentType, PageBreak } from "docx";
 import { Buffer } from "buffer";
 import { Octokit } from "@octokit/rest";
+import nodemailer from "nodemailer";
+
 
 export async function POST(req: NextRequest) {
     try {
@@ -55,7 +57,7 @@ export async function POST(req: NextRequest) {
                     new TextRun({ text: "NOTEBOOK", bold: true, font: "Aptos (Corpo)", size: 24 }),
                     new TextRun({ text: ", modelo: ", size: 24, font: "Aptos (Corpo)" }),
                     new TextRun({ text: "HP ELITEBOOK 640 G11  ", bold: true, font: "Aptos (Corpo)", size: 24 }),
-                    new TextRun({ text: "SÉRIE", font: "Aptos (Corpo)", size: 24 }),
+                    new TextRun({ text: "SÉRIE ", font: "Aptos (Corpo)", size: 24 }),
                     new TextRun({ text: "BRJ442MM83 e MOUSE C/ FIO,", font: "Aptos (Corpo)", bold: true, size: 24 }),
                     new TextRun({ text: ", ao Colaborador ", font: "Aptos (Corpo)", size: 24 }),
                     new TextRun({ text: nome, bold: true, font: "Aptos (Corpo)", size: 24 }),
@@ -176,7 +178,7 @@ export async function POST(req: NextRequest) {
             quebraLinha(),
             new Paragraph({
                 alignment: AlignmentType.CENTER,
-                children: [new TextRun({ text: `São Paulo, ${data}`, font: "Aptos (Corpo)", size:24 })],
+                children: [new TextRun({ text: `São Paulo, ${data}`, font: "Aptos (Corpo)", size: 24 })],
             }),
             quebraLinha(),
             ...assinaturaContent,
@@ -241,14 +243,14 @@ export async function POST(req: NextRequest) {
                 },
             ],
         });
-
         const buffer = await Packer.toBuffer(doc);
+
 
         // Upload to GitHub
         const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
         const owner = process.env.GITHUB_OWNER!;
         const repo = process.env.GITHUB_REPO!;
-        const filePath = process.env.GITHUB_PATH ? `${process.env.GITHUB_PATH}/termo-responsabilidade-${nomeSemAssentos}-${data}.docx` : `termo-responsabilidade-${nomeSemAssentos}-${data}.docx`;
+        const filePath = process.env.GITHUB_PATH ? `${process.env.GITHUB_PATH}/termo-responsabilidade-${nomeSemAssentos}-${data}.pdf` : `termo-responsabilidade-${nomeSemAssentos}-${data}.pdf`;
 
         let sha;
         try {
@@ -275,12 +277,11 @@ export async function POST(req: NextRequest) {
             sha,
         });
 
-
         return new NextResponse(buffer, {
             status: 200,
             headers: {
                 "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                "Content-Disposition": `attachment; filename="termo-responsabilidade-${nomeSemAssentos}.docx"`,
+                "Content-Disposition": `attachment; filename="termo-responsabilidade-${nomeSemAssentos}.pdf"`,
             },
         });
     } catch (error) {
@@ -290,4 +291,5 @@ export async function POST(req: NextRequest) {
             { status: 500 }
         );
     }
+
 }

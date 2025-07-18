@@ -48,6 +48,7 @@ export default function termPage() {
 
     const nome = searchParams.get('nome')
     const cargo = searchParams.get('cargo')
+    const serie = searchParams.get('serie')
     const [showTermBackup, setShowTermBack] = useState(false);
     const [showTermNote, setShowTermNote] = useState(true);
     // botão seguir
@@ -122,7 +123,7 @@ export default function termPage() {
                             01, com endereço na Rua Professora Helena Moura Lacerda, n.º 140 – Vila
                             Hamburguesa – São Paulo/SP – CEP: 05319-015, aqui denominada {" "}
                             <strong>EMPREGADORA</strong>, entrega neste ato, o <strong>NOTEBOOK</strong>, modelo: <strong>HP ELITEBOOK 640
-                                G11</strong> SÉRIE <strong>BRJ442MM83</strong> e <strong>MOUSE C/ FIO</strong>, ao Colaborador <strong>{nome}</strong> {" "}
+                                G11</strong> SÉRIE <strong>{serie}</strong> e <strong>MOUSE C/ FIO</strong>, ao Colaborador <strong>{nome}</strong> {" "}
                             Cargo <strong>{cargo}</strong>, portador do RG sob o nº <strong>{rg}</strong> {" "}
                             doravante <strong>DENOMINADO</strong> simplesmente <strong>COLABORADOR</strong>, sob as seguintes
                             seguintes condições:

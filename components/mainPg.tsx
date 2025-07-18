@@ -15,6 +15,7 @@ export default function Pgmain() {
     const [inputName, setInputName] = useState('');
     const [inputPosition, setInputPosition] = useState('');
     const [inputRg, setInputRg] = useState('');
+    const [inputSerie, setInputSerie] = useState('');
     const [showContact, setShowContact] = useState(false);
     // monitoramento da animação de carregar 
     const [loading, setLoading] = useState(false);
@@ -45,7 +46,7 @@ export default function Pgmain() {
         setLoading(true);
         setTimeout(() => {
             try {
-                router.push(`/term?nome=${inputName}&cargo=${inputPosition}&rg=${encodeURIComponent(encrypt(inputRg))}`);
+                router.push(`/term?nome=${inputName}&cargo=${inputPosition}&rg=${encodeURIComponent(encrypt(inputRg))}&serie=${inputSerie}`);
             } catch {
                 alert('Erro ao gerar contrato');
                 setLoading(false);
@@ -96,6 +97,14 @@ export default function Pgmain() {
                             placeholder="RG sem os pontos"
                             value={inputRg}
                             onChange={(e) => setInputRg(e.target.value)}
+                            required
+                        />
+                        <input
+                            type="text"
+                            className={`${regularFont.className} w-full md:w-auto outline-0 border border-[#009CA6] p-4 rounded-2xl placeholder:text-[#009CA6]`}
+                            placeholder="Serie"
+                            value={inputSerie}
+                            onChange={(e) => setInputSerie(e.target.value)}
                             required
                         />
                     </div>

@@ -24,7 +24,6 @@ export default function screenAuth() {
         })
 
         if (res.ok) {
-            setLoading(false)
             router.push('/registro')
         } else {
             setLoading(false)
@@ -56,7 +55,7 @@ export default function screenAuth() {
                 />
                 <button
                     type='submit'
-                    className={`${boldFont.className} bg-[#009CA6] text-[20px] w-[30%] h-[50px] md:w-[10%] shadow-[0px_9px_11px_rgba(0,0,0,0.25)] z-99`}
+                    className={`${boldFont.className} text-white cursor-pointer bg-[#009CA6] text-[20px] w-[30%] h-[50px] md:w-[10%] shadow-[0px_9px_11px_rgba(0,0,0,0.25)] z-99`}
                 >Entrar</button>
                 {error && <p className="text-red-500">{error}</p>}
             </form>

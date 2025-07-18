@@ -16,7 +16,7 @@ export default function Pgmain() {
             <div className="w-full p-5 border-b border-[#e5e8eb] flex flex-row justify-between">
                 <img src="/title.svg" alt="cobasi" className="w-1/3 md:w-[16%]" />
                 <button onClick={handleLogout}
-                className={`${boldFont.className} h-[30px] w-[20%] md:w-[7%] bg-[#009CA6] text-white shadow-[0px_9px_11px_rgba(0,0,0,0.25)]`}>Sair</button>
+                className={`${boldFont.className} cursor-pointer h-[30px] w-[20%] md:w-[7%] bg-[#009CA6] text-white shadow-[0px_9px_11px_rgba(0,0,0,0.25)]`}>Sair</button>
             </div>
         </div>
     );
