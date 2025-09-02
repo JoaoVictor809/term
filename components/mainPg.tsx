@@ -20,7 +20,7 @@ export default function Pgmain() {
     // monitoramento da animação de carregar 
     const [loading, setLoading] = useState(false);
 
-    const [click, setClick] = useState(Number)
+    const [click, setClick] = useState(0) //fala para iniciar em 0 e não Number 
 
     const secretKey = process.env.NEXT_PUBLIC_AES_SECRET as string;
 

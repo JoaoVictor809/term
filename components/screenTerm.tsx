@@ -62,6 +62,31 @@ export default function termPage() {
     const [showButtonSave, setShowButtonSave] = useState(false);
     // monitoramento da animação de carregar 
     const [loading, setLoading] = useState(false);
+    //campo de assinatura 
+    //digitado
+    const [showDigitado, setShowDigitado] = useState(false)
+    //rubrica
+    const [showRubrica, setShowRubrica] = useState(true)
+    //botoes 
+    //digitar 
+    const [showButtonDig, setShowButtonDig] = useState(true)
+    //assinar (rubrica)
+    const [showButtonRub, setShowButtonRub] = useState(false)
+
+    const handleDig = () =>{
+        setShowDigitado(true)
+        setShowRubrica(false)
+        setShowButtonDig(false)
+        setShowButtonRub(true)
+    }
+
+    const handleRub = () =>{
+        setShowDigitado(false)
+        setShowRubrica(true)
+        setShowButtonDig(true)
+        setShowButtonRub(false)
+    }
+
 
     if (loading) {
         return <Loader />
@@ -255,15 +280,34 @@ export default function termPage() {
                     </div>
                     <div className="flex flex-col justify-center items-center h-[100%] gap-5">
                         Assinar:
-                        <SignatureCanvas
-                            ref={sigCanvas}
-                            penColor='black'
-                            backgroundColor="#fff"
-                            canvasProps={{ width: 500, height: 200, className: 'sigCanvas', color: '#fff' }}
-                        />
+                        {showRubrica && (
+                            <SignatureCanvas
+                                ref={sigCanvas}
+                                penColor='black'
+                                backgroundColor="#fff"
+                                canvasProps={{ width: 500, height: 200, className: 'sigCanvas', color: '#fff' }}
+                            />
+                        )}
+                        {showDigitado && (
+                            <input type="text" className="bg-white outline-0 w-[70%] p-3 text-3x2" />
+                        )}
                         <div className="flex flex-row gap-5">
                             <button className="w-[120px] h-10 flex items-center justify-center cursor-pointer bg-[#D9D9D9] shadow-xl active:opacity-18"
-                                onClick={clearSignature}>Corrigir</button>
+                                onClick={clearSignature}>Corrigir
+                            </button>
+                            {/* botões */}
+                            {/* digitar */}
+                            {showButtonDig && (
+                                <button className="w-[120px] h-10 flex items-center justify-center cursor-pointer bg-[#D9D9D9] shadow-xl active:opacity-18"
+                                    onClick={handleDig}>Digitar
+                                </button>
+                            )}
+                            {/* rubrica */}
+                            {showButtonRub && (
+                                <button className="w-[120px] h-10 flex items-center justify-center cursor-pointer bg-[#D9D9D9] shadow-xl active:opacity-18"
+                                    onClick={handleRub}>Rubricar
+                                </button>
+                            )}
                             <button
                                 className="w-[120px] h-10 flex items-center justify-center cursor-pointer bg-[#009CA6] shadow-xl active:opacity-18"
                                 onClick={() => {
