@@ -159,7 +159,7 @@ export async function POST(req: NextRequest) {
       attachments: [
         {
           filename: `termo-responsabilidade-${nome}.pdf`,
-          content: pdfBuffer,
+          content: Buffer.from(pdfBuffer),
           contentType: 'application/pdf',
         },
       ],
