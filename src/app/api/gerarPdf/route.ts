@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import puppeteer from "puppeteer";
+import chromium from "chrome-aws-lambda";
+import puppeteer from "puppeteer-core";
 import nodemailer from "nodemailer";
 import { Octokit } from "@octokit/rest";
 
@@ -75,7 +76,7 @@ export async function POST(req: NextRequest) {
         </style>
       </head>
       <body>
-        <img src="http://localhost:3000/logo.png" alt="Logo" width="120" height="100" />
+        <img src="/logo.png" alt="Logo" width="120" height="100" />
         <h1>TERMO DE RESPONSABILIDADE - NOTEBOOK CORPORATIVO</h1>
 
         <p><span class="bold">COBASI COMÉRCIO DE PRODUTOS BÁSICOS E INDUSTRIALIZADOS S.A.</span>, pessoa jurídica de direito privado, inscrita no CNPJ/MF sob o n.º 53.153.938/0007-01, com endereço na Rua Professora Helena Moura Lacerda, n.º 140 – Vila Hamburguesa – São Paulo/SP – CEP: 05319-015, aqui denominada <span class="bold">EMPREGADORA</span>, entrega neste ato, o <span class="bold">NOTEBOOK</span>, modelo: <span class="bold">HP ELITEBOOK 640 G11</span> SÉRIE <span class="bold">BRJ442MM83, MOCHILA e MOUSE C/ FIO,</span> ao Colaborador <span class="bold">${nome}</span>, Cargo <span class="bold">${cargo}</span>, portador do RG sob o nº <span class="bold">${rg}</span>, doravante denominado <span class="bold">COLABORADOR</span>, sob as seguintes condições:</p>
@@ -101,7 +102,7 @@ export async function POST(req: NextRequest) {
         <div class="page-break"></div>
         <div class="space"></div>
         
-        <img src="http://localhost:3000/logo.png" alt="Logo" width="120" height="100" />
+        <img src="/logo.png" alt="Logo" width="120" height="100" />
         <h1>TERMO DE RESPONSABILIDADE DE BACKUP - DADOS CORPORATIVO</h1>
 
         <p><span class="bold">COBASI COMÉRCIO DE PRODUTOS BÁSICOS E INDUSTRIALIZADOS S.A.</span>, pessoa jurídica de direito privado, inscrita no CNPJ/MF sob o n.º 53.153.938/0007-01, com endereço na Rua Professora Helena Moura Lacerda, n.º 140 – Vila Hamburguesa – São Paulo/SP – CEP: 05319-015, aqui denominada <span class="bold">EMPREGADORA</span>, neste ato comunica que a responsabilidade pelo salvamento e arquivamento de dados corporativos são de inteira responsabilidade do <strong>${nome}</strong> cargo <strong>${cargo}</strong>, portador do RG sob o nº <strong>${rg}</strong>, <span class="bold">DENOMINADO</span> simplesmente <span class="bold">COLABORADOR</span>, sob as seguintes condições:</p>
@@ -128,8 +129,12 @@ export async function POST(req: NextRequest) {
     `;
 
     const browser = await puppeteer.launch({
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath,
+      headless: chromium.headless,
     });
+
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: 'networkidle0' });
     const pdfBuffer = await page.pdf({

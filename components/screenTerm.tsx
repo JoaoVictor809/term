@@ -304,7 +304,7 @@ export default function termPage() {
                                             }}>Não</button>
 
                                         <button className="cursor-pointer bg-[#7EB339] text-white w-15 h-7"
-                                            onClick={() => { setOptionEmail(false), setEmail(true) }}>Sim</button>
+                                            onClick={() => { setOptionEmail(false), setEmail(true),setEmailClient("") }}>Sim</button>
                                     </div>
                                 </div>
                             )}
