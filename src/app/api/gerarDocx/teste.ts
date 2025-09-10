@@ -5,6 +5,7 @@ import { Octokit } from "@octokit/rest";
 import nodemailer from "nodemailer";
 
 
+
 export async function POST(req: NextRequest) {
     try {
         const logoUrl = new URL("/logo.png", req.url).toString();
@@ -12,7 +13,7 @@ export async function POST(req: NextRequest) {
         const logoBuffer = await logoResponse.arrayBuffer();
 
         const body = await req.json();
-        const { nome, cargo, rg, data, assinaturaBase64 } = body;
+        const { nome, cargo, rg, data, assinaturaBase64, emailClient } = body;
         const nomeSemAssentos = nome.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
         if (!nome || !cargo || !rg || !data) {
@@ -77,17 +78,14 @@ export async function POST(req: NextRequest) {
                 numbering: { reference: "notebookList", level: 0 },
                 children: [new TextRun({ text: "O Notebook deverá ser utilizado ÚNICA e EXCLUSIVAMENTE a serviço da empresa, tendo em vista a atividade a ser exercida pelo Colaborador.", font: "Aptos (Corpo)", size: 24 })],
             }),
-            quebraLinha(),
             new Paragraph({
                 numbering: { reference: "notebookList", level: 0 },
                 children: [new TextRun({ text: "Ficará o Colaborador responsável pelo uso do equipamento, sendo que, em caso de comprovado mau uso, por culpa ou dolo do Colaborador, este ressarcirá a EMPREGADORA COBASI pelos danos e prejuízos causados por sua ação ou omissão.", font: "Aptos (Corpo)", size: 24 })],
             }),
-            quebraLinha(),
             new Paragraph({
                 numbering: { reference: "notebookList", level: 0 },
                 children: [new TextRun({ text: "O Colaborador tem somente a DETENÇÃO, tendo em vista o uso exclusivo para prestação de serviços profissionais e NÃO a PROPRIEDADE, sendo terminantemente proibido o empréstimo, aluguel ou cessão deste a terceiros.", font: "Aptos (Corpo)", size: 24 })],
             }),
-            quebraLinha(),
             new Paragraph({
                 numbering: { reference: "notebookList", level: 0 },
                 children: [new TextRun({ text: "Ao término da prestação de serviço ou do contrato individual de trabalho, o Colaborador compromete-se a devolver o NOTEBOOK COM CARREGADOR, em perfeito estado, no mesmo dia em que for comunicado ou comunique seu desligamento.", font: "Aptos (Corpo)", size: 24 })],
@@ -143,17 +141,14 @@ export async function POST(req: NextRequest) {
                 numbering: { reference: "backupList", level: 0 },
                 children: [new TextRun({ text: "Dados corporativos devem ser salvos em nuvem ou nas pastas disponibilizadas na rede corporativa.", font: "Aptos (Corpo)", size: 24 })],
             }),
-            quebraLinha(),
             new Paragraph({
                 numbering: { reference: "backupList", level: 0 },
                 children: [new TextRun({ text: "Ficará o Colaborador em caso de necessidade da troca da máquina em caráter de manutenção, responsável pelo BACKUP dos arquivos que julgar necessários, em função do seu trabalho (PSTs, DOCs, etcs.).", font: "Aptos (Corpo)", size: 24 })],
             }),
-            quebraLinha(),
             new Paragraph({
                 numbering: { reference: "backupList", level: 0 },
                 children: [new TextRun({ text: "Em caso de arquivos terem sido mantidos localmente na máquina, será necessário a abertura de uma solicitação para recuperação dos arquivos.", font: "Aptos (Corpo)", size: 24 })],
             }),
-            quebraLinha(),
             new Paragraph({
                 numbering: { reference: "backupList", level: 0 },
                 children: [new TextRun({ text: "O colaborador fica ciente que, passado o prazo de 5 (cinco) dias corridos, a máquina recolhida pela equipe de TI passará pelo processo de formatação e não serão mais mantidos os arquivos salvos na máquina física.", font: "Aptos (Corpo)", size: 24 })],
@@ -251,6 +246,20 @@ export async function POST(req: NextRequest) {
         });
         const buffer = await Packer.toBuffer(doc);
 
+        //envio para o emial 
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS,
+            },
+        });
+        const mailOptions = {
+            from: 'joaovictorcobasi@gmail.com',
+            to: emailClient,
+            subject: 'Testando o envio do email',
+            text: "teste",
+        };
 
         // Upload to GitHub
         const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
@@ -268,9 +277,12 @@ export async function POST(req: NextRequest) {
             if ("sha" in fileData) {
                 sha = fileData.sha;
             }
+            const info = await transporter.sendMail(mailOptions);
+            return NextResponse.json({ success: true, info });
         } catch (error: any) {
             if (error.status !== 404) {
-                throw error;
+                console.error('Erro ao enviar email:', error);
+                return NextResponse.json({ success: false, error: error.message || error.toString() })
             }
         }
 
@@ -297,4 +309,5 @@ export async function POST(req: NextRequest) {
             { status: 500 }
         );
     }
+
 }
