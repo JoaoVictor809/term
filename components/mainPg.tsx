@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import Header from '../components/headerTerm'
 import Loader from '../components/animation/Loader'
 import CryptoJS from "crypto-js";
+import Swal from 'sweetalert2'
 
 
 const boldFont = localFont({ src: '../public/fonts/Poppins-Bold.ttf' })
@@ -44,14 +45,24 @@ export default function Pgmain() {
 
     const handleRouter = () => {
         setLoading(true);
-        setTimeout(() => {
-            try {
-                router.push(`/term?nome=${inputName}&cargo=${inputPosition}&rg=${encodeURIComponent(encrypt(inputRg))}&serie=${inputSerie}`);
-            } catch {
-                alert('Erro ao gerar contrato');
-                setLoading(false);
-            }
-        }, 5000);
+
+        if (inputSerie.length == 10) {
+            setTimeout(() => {
+                try {
+                    router.push(`/term?nome=${inputName}&cargo=${inputPosition}&rg=${encodeURIComponent(encrypt(inputRg))}&serie=${inputSerie}`);
+                } catch {
+                    alert('Erro ao gerar contrato');
+                    setLoading(false);
+                }
+            }, 5000);
+        } else {
+            Swal.fire({
+                title: "Erro!",
+                text: `O número da série esta incompleto`,
+                icon: "error"
+            });
+            setLoading(false);
+        }
     };
 
 
