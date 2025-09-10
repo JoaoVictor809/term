@@ -15,7 +15,11 @@ const boldFont = localFont({ src: '../public/fonts/Poppins-Bold.ttf' })
 export default function termPage() {
     const sigCanvas = useRef<SignatureCanvas>(null);
     const clearSignature = () => {
-        sigCanvas.current?.clear();
+        if (showRubrica) {
+            sigCanvas.current?.clear();
+        } else {
+            setSignatureText("");
+        }
     };
     // formato da data na assinatura
     const [dataFormatada, setDataFormatada] = useState('');
@@ -65,6 +69,7 @@ export default function termPage() {
     //campo de assinatura 
     //digitado
     const [showDigitado, setShowDigitado] = useState(false)
+    const [signatureText, setSignatureText] = useState("");
     //rubrica
     const [showRubrica, setShowRubrica] = useState(true)
     //botoes 
@@ -72,15 +77,23 @@ export default function termPage() {
     const [showButtonDig, setShowButtonDig] = useState(true)
     //assinar (rubrica)
     const [showButtonRub, setShowButtonRub] = useState(false)
+    //campo sew deseja email
+    const [wantEmail, setWantEmail] = useState(false)
+    //opçoes 
+    const [optionEmail, setOptionEmail] = useState(true)
+    //email
+    const [email, setEmail] = useState(false)
+    //email cliente
+    const [emailClient, setEmailClient] = useState("julia.moreira@petanjofranqueadora.com.br")
 
-    const handleDig = () =>{
+    const handleDig = () => {
         setShowDigitado(true)
         setShowRubrica(false)
         setShowButtonDig(false)
         setShowButtonRub(true)
     }
 
-    const handleRub = () =>{
+    const handleRub = () => {
         setShowDigitado(false)
         setShowRubrica(true)
         setShowButtonDig(true)
@@ -207,61 +220,8 @@ export default function termPage() {
                 {showButtonSave && (
                     <button
                         className="w-[20%] h-10 flex items-center justify-center cursor-pointer bg-[#7EB339] shadow-xl active:opacity-18"
-                        onClick={async () => {
-                            if (!signatureURL) {
-                                Swal.fire({
-                                    title: "Erro na assinatura!",
-                                    text: "Assinatura não encontrada!",
-                                    icon: "error"
-                                });
-                                return;
-                            }
-
-                            try {
-                                setLoading(true);
-                                const base64 = signatureURL.replace(/^data:image\/png;base64,/, "");
-                                const res = await fetch("/api/gerarDocx", {
-                                    method: "POST",
-                                    headers: { "Content-Type": "application/json" },
-                                    body: JSON.stringify({
-                                        nome,
-                                        cargo,
-                                        rg,
-                                        data: dataFormatada,
-                                        assinaturaBase64: base64,
-                                    }),
-                                });
-                                if (res.ok) {
-                                    setLoading(false);
-                                    Swal.fire({
-                                        title: "Termo salvo!",
-                                        text: "Seu termo de responsabilidade foi salvo no nosso sistema",
-                                        icon: "success"
-                                    });
-                                }
-                                if (!res.ok) {
-                                    const errorData = await res.json().catch(() => ({ message: "Erro desconhecido ao gerar o documento." }));
-                                    Swal.fire({
-                                        title: "Erro na formatação do documento!",
-                                        text: `Erro ao gerar o documento: ${errorData.message || res.statusText}`,
-                                        icon: "error"
-                                    });
-                                    return;
-                                }
-                                const blob = await res.blob();
-                                const url = URL.createObjectURL(blob);
-                                const a = document.createElement("a");
-                                a.href = url;
-                                a.download = "termo-responsabilidade.docx";
-                                document.body.appendChild(a);
-                                a.click();
-                                URL.revokeObjectURL(url);
-                                document.body.removeChild(a);
-                            } catch {
-                                alert("Erro inesperado entrar")
-                            }
-
-
+                        onClick={() => {
+                            setWantEmail(true)
                         }}
                     >
                         Salvar
@@ -269,6 +229,154 @@ export default function termPage() {
                 )}
 
             </div>
+            {/* campo email */}
+            {wantEmail && (
+                <div className="w-[100%] h-[100vh] backdrop-blur-md bg-white/30 border border-white/20 shadow-xl/30 absolute top-0">
+                    <div className="absolute top-10 right-10 cursor-pointer"
+                        onClick={() => {
+                            setWantEmail(false)
+                        }}>
+                        <IoClose size={35} color="#000" />
+                    </div>
+                    <div className="flex w-[100%] h-[100vh] justify-center items-center">
+                        <div className="w-[50%]  bg-[#009CA6] ">
+                            {optionEmail && (
+                                <div className="flex justify-center text-center flex-col gap-7 pt-5 pb-5">
+                                    <p className="text-2xl text-white">Deseja Receber o Termo no seu email</p>
+                                    <div className="flex justify-around">
+                                        <button className="cursor-pointer bg-[#b11313] text-white w-15 h-7"
+                                            onClick={async () => {
+                                                if (!signatureURL) {
+                                                    Swal.fire({
+                                                        title: "Erro na assinatura!",
+                                                        text: "Assinatura não encontrada!",
+                                                        icon: "error"
+                                                    });
+                                                    return;
+                                                }
+
+
+                                                try {
+                                                    setLoading(true);
+                                                    const base64 = signatureURL.replace(/^data:image\/png;base64,/, "");
+                                                    const res = await fetch("/api/gerarPdf", {
+                                                        method: "POST",
+                                                        headers: { "Content-Type": "application/json" },
+                                                        body: JSON.stringify({
+                                                            nome,
+                                                            cargo,
+                                                            rg,
+                                                            data: dataFormatada,
+                                                            assinaturaBase64: base64,
+                                                            emailClient
+                                                        }),
+                                                    });
+                                                    if (res.ok) {
+                                                        setLoading(false);
+                                                        setWantEmail(false)
+                                                        Swal.fire({
+                                                            title: "Termo salvo!",
+                                                            text: "Seu termo de responsabilidade foi salvo no nosso sistema",
+                                                            icon: "success"
+                                                        });
+                                                    }
+                                                    if (!res.ok) {
+                                                        const errorData = await res.json().catch(() => ({ message: "Erro desconhecido ao gerar o documento." }));
+                                                        Swal.fire({
+                                                            title: "Erro na formatação do documento!",
+                                                            text: `Erro ao gerar o documento: ${errorData.message || res.statusText}`,
+                                                            icon: "error"
+                                                        });
+                                                        return;
+                                                    }
+                                                    const blob = await res.blob();
+                                                    const url = URL.createObjectURL(blob);
+                                                    const link = document.createElement("a");
+                                                    link.href = url;
+                                                    link.download = `termo-responsabilidade.pdf`;
+                                                    document.body.appendChild(link);
+                                                    link.click();
+                                                    link.remove();
+                                                    URL.revokeObjectURL(url);
+                                                } catch {
+                                                    alert("Erro inesperado entrar")
+                                                }
+                                            }}>Não</button>
+
+                                        <button className="cursor-pointer bg-[#7EB339] text-white w-15 h-7"
+                                            onClick={() => { setOptionEmail(false), setEmail(true) }}>Sim</button>
+                                    </div>
+                                </div>
+                            )}
+                            {email && (
+                                <div className="flex justify-center text-center flex-col gap-7 pt-5 pb-5">
+                                    <p className="text-2xl text-white">Qual email será encaminhado o termo?</p>
+                                    <div className="">
+                                        <input type="text" className="bg-white w-[70%] outline-0 text-15"
+                                            placeholder="Digite seu email!"
+                                            value={emailClient}
+                                            onChange={(e) => setEmailClient(e.target.value)} />
+                                        <button className="cursor-pointer bg-[#7EB339] text-white w-15 h-7"
+                                            onClick={async () => {
+                                                if (!signatureURL) {
+                                                    Swal.fire({
+                                                        title: "Erro na assinatura!",
+                                                        text: "Assinatura não encontrada!",
+                                                        icon: "error"
+                                                    });
+                                                    return;
+                                                }
+
+
+                                                try {
+                                                    setLoading(true);
+                                                    const base64 = signatureURL.replace(/^data:image\/png;base64,/, "");
+                                                    const res = await fetch("/api/gerarPdf", {
+                                                        method: "POST",
+                                                        headers: { "Content-Type": "application/json" },
+                                                        body: JSON.stringify({ nome, cargo, rg, data: dataFormatada, assinaturaBase64: base64, emailClient }),
+                                                    });
+
+                                                    if (!res.ok) {
+                                                        const errorData = await res.json().catch(() => ({ message: "Erro desconhecido." }));
+                                                        Swal.fire({
+                                                            title: "Erro!",
+                                                            text: errorData.message || "Erro ao gerar documento",
+                                                            icon: "error",
+                                                        });
+                                                        return;
+                                                    }
+
+                                                    const blob = await res.blob();
+                                                    const url = URL.createObjectURL(blob);
+                                                    const link = document.createElement("a");
+                                                    link.href = url;
+                                                    link.download = `termo-responsabilidade-.pdf`;
+                                                    document.body.appendChild(link);
+                                                    link.click();
+                                                    link.remove();
+                                                    URL.revokeObjectURL(url);
+
+                                                    Swal.fire({
+                                                        title: "Termo salvo!",
+                                                        text: "O termo foi salvo e enviado ao seu email.",
+                                                        icon: "success"
+                                                    });
+                                                    setLoading(false)
+                                                    // setEmail(false)
+                                                    setWantEmail(false)
+
+                                                } catch {
+                                                    alert("Erro inesperado entrar")
+                                                }
+                                            }}>Enviar</button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
             {/* campo de assinar */}
             {showToSign && (
                 <div className="w-[100%] h-[100vh] backdrop-blur-md bg-white/30 border border-white/20 shadow-xl/30 absolute top-0">
@@ -289,7 +397,13 @@ export default function termPage() {
                             />
                         )}
                         {showDigitado && (
-                            <input type="text" className="bg-white outline-0 w-[70%] p-3 text-3x2" />
+                            <input
+                                type="text"
+                                className="bg-white outline-0 w-[70%] p-3 text-3x2"
+                                value={signatureText}
+                                onChange={(e) => setSignatureText(e.target.value)}
+                                placeholder="Digite seu nome completo"
+                            />
                         )}
                         <div className="flex flex-row gap-5">
                             <button className="w-[120px] h-10 flex items-center justify-center cursor-pointer bg-[#D9D9D9] shadow-xl active:opacity-18"
@@ -311,11 +425,39 @@ export default function termPage() {
                             <button
                                 className="w-[120px] h-10 flex items-center justify-center cursor-pointer bg-[#009CA6] shadow-xl active:opacity-18"
                                 onClick={() => {
-                                    const dataUrl = sigCanvas.current?.toDataURL("image/png");
-                                    if (dataUrl) {
+                                    if (showRubrica) {
+                                        const dataUrl = sigCanvas.current?.toDataURL("image/png");
+                                        if (dataUrl) {
+                                            setSignatureURL(dataUrl);
+                                            setShowToSign(false);
+                                            setShowButtonSave(true);
+                                        }
+                                    } else {
+                                        if (signatureText.trim() === "") {
+                                            Swal.fire({
+                                                title: "Erro na assinatura!",
+                                                text: "O campo de assinatura não pode estar vazio.",
+                                                icon: "error"
+                                            });
+                                            return;
+                                        }
+                                        const canvas = document.createElement("canvas");
+                                        const ctx = canvas.getContext("2d");
+                                        canvas.width = 700;
+                                        canvas.height = 200;
+                                        if (ctx) {
+                                            ctx.fillStyle = "#fff";
+                                            ctx.fillRect(0, 0, canvas.width, canvas.height);
+                                            ctx.fillStyle = "#000";
+                                            ctx.font = "italic 45px 'Arial'";
+                                            ctx.textAlign = "center";
+                                            ctx.textBaseline = "middle";
+                                            ctx.fillText(signatureText, canvas.width / 2, canvas.height / 2);
+                                        }
+                                        const dataUrl = canvas.toDataURL("image/png");
                                         setSignatureURL(dataUrl);
                                         setShowToSign(false);
-                                        setShowButtonSave(true)
+                                        setShowButtonSave(true);
                                     }
                                 }}
                             >
