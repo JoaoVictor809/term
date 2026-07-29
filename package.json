@@ -11,6 +11,8 @@
   "dependencies": {
     "@lottiefiles/dotlottie-react": "^0.14.2",
     "@octokit/rest": "^22.0.0",
+    "@sparticuz/chromium": "^149.0.0",
+    "@sparticuz/chromium-min": "^149.0.0",
     "crypto-js": "^4.2.0",
     "docx": "^9.5.1",
     "docxtemplater": "^3.65.2",
@@ -24,7 +26,9 @@
     "pdf-lib": "^1.17.1",
     "pdfmake": "^0.2.20",
     "pizzip": "^3.2.0",
+    "prop-types": "^15.8.1",
     "puppeteer": "^24.19.0",
+    "puppeteer-core": "^25.4.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-icons": "^5.5.0",
